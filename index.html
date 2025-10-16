@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>최종 연출</title>
+    <style>
+        /* CSS는 이전과 동일합니다. */
+        body, html {
+            margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f4f4f9; display: flex; justify-content: center; align-items: center; height: 100%;
+        }
+        #survey-page {
+            background-color: white; max-width: 600px; width: 90%; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: opacity 0.5s;
+        }
+        button {
+            width: 100%; padding: 15px 30px; font-size: 18px; font-weight: bold; cursor: pointer;
+            background: linear-gradient(45deg, #6a11cb, #2575fc); color: white; border: none; border-radius: 6px;
+        }
+        #standby-message { text-align: center; font-size: 24px; font-weight: bold; color: #2575fc; }
+        #hacking-video { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 9999; background-color: black; }
+    </style>
+</head>
+<body>
+    <div id="survey-page">
+        <h1 style="text-align: center;">✨ 연애 심리 테스트 ✨</h1>
+        <form id="real-survey-form" action="https://docs.google.com/forms/u/0/d/e/1FAIpQLSfaVMZHSrtaysth2w-TWHRxgI0N08OxwXvt5ejXs2jV-v8ZZg/formResponse">
+            <div class="question"><label for="name">당신의 이름은?</label><input type="text" id="name" name="entry.1281982188" placeholder="이름을 입력하세요" required></div>
+            <div class="question"><label>선호하는 데이트 스타일은?</label><div class="radio-group"><label><input type="radio" name="entry.325326840" value="활동적인 데이트" required> 활동적인 데이트</label><br><label><input type="radio" name="entry.325326840" value="정적인 데이트"> 정적인 데이트</label></div></div>
+            <button id="submit-btn" type="submit">결과 분석 시작하기</button>
+        </form>
+    </div>
+    
+    <video id="hacking-video" src="hacking.mp4" muted preload="auto"></video>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    
+
+    <script>
+        // [⭐ 중요] 1단계에서 복사한 firebaseConfig 코드를 여기에 붙여넣으세요!
+        const firebaseConfig = {
+            apiKey: "AIzaSyB7boUapvHbQAvUHmhWcphE31PrA_JXrA0",
+            authDomain: "event-controller-a24ca.firebaseapp.com",
+            projectId: "event-controller-a24ca",
+            storageBucket: "event-controller-a24ca.firebasestorage.app",
+            messagingSenderId: "164257055931",
+            appId: "1:164257055931:web:58ecf24e9081d2063b159e",
+            measurementId: "G-JR9Z3GXF2J"
+        };
+
+        // Firebase 앱 초기화
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        const surveyPage = document.getElementById('survey-page');
+        const surveyForm = document.getElementById('real-survey-form');
+        const hackingVideo = document.getElementById('hacking-video');
+        let isHackingStarted = false; // 중복 실행 방지용 플래그
+
+        // 폼 제출 이벤트 처리 (이전과 동일)
+        surveyForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(surveyForm);
+            fetch(surveyForm.action, { method: 'POST', body: formData, mode: 'no-cors' });
+            surveyPage.innerHTML = '<div id="standby-message">📊<br><br>결과를 분석 중입니다...</div>';
+        });
+
+
+        // [⭐ 변경] Firebase 데이터베이스의 'hackStatus' 값이 바뀌는지 실시간으로 감지
+        database.ref('hackStatus').on('value', (snapshot) => {
+            const data = snapshot.val();
+            // 값이 'start'이고, 아직 해킹이 시작되지 않았다면
+            if (data === 'start' && !isHackingStarted) {
+                isHackingStarted = true; // 중복 실행 방지
+                startHacking();
+            }
+        });
+
+        function startHacking() {
+        surveyPage.style.opacity = '0';
+        
+        setTimeout(() => {
+            surveyPage.style.display = 'none';
+            // 화면 스크롤바 제거 (전체 화면처럼 보이게)
+            document.body.style.overflow = 'hidden'; 
+            
+            hackingVideo.style.display = 'block';
+            hackingVideo.play();
+            // ❌ 이 줄을 삭제하거나 주석 처리하세요.
+            // hackingVideo.requestFullscreen(); 
+            // 💡 "가짜" 전체 화면은 이 호출 없이도 CSS로 충분히 구현됩니다.
+        }, 500); 
+    }
+    </script>
+</body>
+</html>
